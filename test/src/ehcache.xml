@@ -1,0 +1,27 @@
+<ehcache>  
+    <diskStore path="java.io.tmpdir"/>  
+  
+    <defaultCache  
+        maxElementsInMemory="1000"  
+        eternal="false"  
+        timeToIdleSeconds="120"  
+        timeToLiveSeconds="120"  
+        overflowToDisk="true"  
+    />  
+  
+    <cache  
+        name="userCache"  
+        maxElementsInMemory="100"  
+        eternal="false"  
+        timeToIdleSeconds="600"  
+        timeToLiveSeconds="3600"  
+        overflowToDisk="true"  
+    />  
+</ehcache> 
+<!-- 
+ 内存中最多存放100个对象。  
+ 不是永久缓存。   
+ 最大空闲时间为600秒。  
+ 最大活动时间为3600秒。  
+ 如果内存对象溢出则保存到磁盘。
+ -->

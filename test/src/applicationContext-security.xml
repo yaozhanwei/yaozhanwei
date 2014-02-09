@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+	<!-- 国际化支持 
+	<beans:bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<beans:property name="basename"
+			value="org.springframework.security.messages" />
+	</beans:bean>
+	-->
+	<http auto-config='true' access-denied-page="/403_error.jsp" >
+	</http>
+	<authentication-provider>
+		<!-- <user-service> <user name="admin" password="admin" authorities="ROLE_ADMIN"/> 
+			<user name="user" password="user" authorities="ROLE_USER"/> </user-service> -->
+		<!-- 改为从数据库读取用户信息 -->
+		<password-encoder hash="md5" />
+		<jdbc-user-service data-source-ref="dataSource"
+			cache-ref="userCache" 
+			users-by-username-query="select username,password,status as enabled from users where username=?"
+			authorities-by-username-query="select u.username,r.name as authority from users u join user_role ur on u.id=ur.user_id join roles r on r.id=ur.role_id where u.username=?" />
+	</authentication-provider>
+	<!-- 缓存登录用户信息开始 -->
+	<beans:bean id="userCache" class="org.springframework.security.providers.dao.cache.EhCacheBasedUserCache" >
+		<beans:property name="cache" ref="userEhCache"/>
+	</beans:bean>
+	<beans:bean id="userEhCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+		<beans:property name="cacheManager" ref="cacheManager"/>  
+    	<beans:property name="cacheName" value="userCache"/> 
+	</beans:bean>
+	<beans:bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" >
+		 <beans:property name="configLocation" value="classpath:ehcache.xml"/>
+	</beans:bean>
+	<!-- 缓存登录用户信息结束 -->
+	<!--自定义资源权限分配 -->
+	<beans:bean id="filterSecurityInterceptor"
+		class="org.springframework.security.intercept.web.FilterSecurityInterceptor"
+		autowire="byType">
+		<custom-filter before="FILTER_SECURITY_INTERCEPTOR" />
+		<beans:property name="objectDefinitionSource" ref="filterInvocationDefinitionSource" />
+	</beans:bean>
+	<beans:bean id="filterInvocationDefinitionSource"
+		class="com.news.www.base.JdbcFilterInvocationDefinitionSourceFactoryBean">
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="resourceQuery"
+			value="select re.res_string,r.name from
+			roles r join resc_role rr on r.id = rr.role_id join res re on  re.id = rr.resc_id" />
+	</beans:bean>
+
+	<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<beans:property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<beans:property name="url"
+			value="jdbc:mysql://localhost:3306/springsecurity" />
+		<beans:property name="username" value="root" />
+		<beans:property name="password" value="83899678" />
+	</beans:bean>
+	<!-- 自定义403页面 -->
+	<beans:bean id="accessDeniedHandler" class="com.news.www.base.MyAccessDeniedHandler">
+		<beans:property name="accessDeniedUrl" value="/403_error" />
+	</beans:bean>
+</beans:beans>

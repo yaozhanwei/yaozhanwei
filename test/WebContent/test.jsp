@@ -8,7 +8,7 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 <meta content="IE=EmulateIE7" http-equiv="X-UA-Compatible">
 </head>
-<!-- 新闻列表 -->
+<!-- 新闻列表,同样试试 -->
 <body>
 <hao:listOut record="10" url="/newsList"></hao:listOut>
 </body>
